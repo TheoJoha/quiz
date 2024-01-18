@@ -1,5 +1,6 @@
 import './App.css';
 import { useState } from "react"
+import {nanoid} from "nanoid"
 
 function App() {
   const [questions, setQuestions] = useState("")
@@ -65,13 +66,13 @@ function App() {
     })
   }
 
-  const handleTypeChange = (e) => {
+  /* const handleTypeChange = (e) => {
     setSettings(prev => {
       return (
         { ...prev, type: e.target.value }
       )
     })
-  }
+  } */
 
   const Start = () => {
     return (
@@ -128,7 +129,7 @@ function App() {
             </label>
           </div>
 
-          <div id="typeDiv">
+          {/* <div id="typeDiv">
             <label>
               Type:
               <select onChange={(e) => handleTypeChange(e)} value={settings.type}>
@@ -140,8 +141,8 @@ function App() {
                 </option>
               </select>
             </label>
-          </div>
-          <button type="submit">START</button>
+          </div> */}
+          <button id="startButton" type="submit">START</button>
         </form>
       </div>
     )
@@ -152,9 +153,9 @@ function App() {
     if (questions) {
       return (
         <div id="quiz">
-          {questions.map(q => <div style={{ display: questions.findIndex(x => x.question === q.question) === questionCount ? "grid" : "none" }} className="question-card" key={q.correct_answer}>
+          {questions.map(q => <div style={{ display: questions.findIndex(x => x.question === q.question) === questionCount ? "grid" : "none" }} className="question-card" key={nanoid()}>
             <div className="question">{q.question}</div>
-            {q.incorrect_answers.concat(q.correct_answer).map(el => <div value={el} onClick={e => handleAnswerClick(e)} key={el} className="answerAlternative">{el}</div>)}
+            {q.incorrect_answers.concat(q.correct_answer).map(el => <div value={el} onClick={e => handleAnswerClick(e)} key={nanoid()} className="answerAlternative">{el}</div>)}
           </div>)}
         </div>
       )
@@ -166,7 +167,7 @@ function App() {
   const Result = () => {
     return (
       <div id="result">
-        {`Your score is ${numberOfCorrectAnswers} out of ${questions.length}`}
+        {`Your score is ${numberOfCorrectAnswers} out of ${questions.length}.`}
       </div>
     )
   }
@@ -183,7 +184,7 @@ function App() {
   const Footer = () => {
     return (
       <div id="footer">
-        <p>Questions from <a href="https://opentdb.com/api_config.php">OPEN TRIVIA DATABASE</a> for use in programming projects.</p>
+        <p>Questions are from <a href="https://opentdb.com/api_config.php">OPEN TRIVIA DATABASE</a> for use in programming projects.</p>
       </div>
     )
   }
