@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 function App() {
   const [questions, setQuestions] = useState("")
@@ -10,15 +10,35 @@ function App() {
     type: "multiple"
   })
   const [view, setView] = useState("start")
+  const [questionCount, setQuestionCount] = useState(0)
+  const [numberOfCorrectAnswers, setNumberOfCorrectAnswers] = useState(0)
 
   const getNewQuestions = async (e) => {
     e.preventDefault()
-    console.log(settings, settings.numberOfQuestions)
     const url = `https://opentdb.com/api.php?amount=${settings.numberOfQuestions}&category=${settings.category}&difficulty=${settings.difficulty}&type=${settings.type}`
     console.log(url)
-    fetch(url).then(res => res.json()).then(resData => console.log(resData))
-    
+    fetch(url).then(res => res.json()).then(resData => setQuestions(resData.results))
+
     setView("quiz")
+    setQuestionCount(0)
+    setNumberOfCorrectAnswers(0)
+  }
+
+  const handleAnswerClick = (e) => {
+    let isCorrect;
+    if (questions.map(qObj => qObj.correct_answer).includes(e.target.textContent)) {
+      isCorrect = true
+    }
+    setNumberOfCorrectAnswers(prev => isCorrect ? prev + 1 : prev)
+    setQuestionCount(prev => prev + 1)
+    setView(prev => {
+      if (questions[questions.length - 1].correct_answer === e.target.textContent || questions[questions.length - 1].incorrect_answers.includes(e.target.textContent)) {
+        console.log("result")
+        return "result"
+      } else {
+        return prev
+      }
+    })
   }
 
   const handleNumberOfQuestionsChange = (e) => {
@@ -57,67 +77,74 @@ function App() {
     return (
       <div id="start">
         <form onSubmit={(e) => getNewQuestions(e)}>
-          <label>
-            Number of questions:
-            <select onChange={(e) => handleNumberOfQuestionsChange(e)} value={settings.numberOfQuestions}>
-              <option value="10">
-                10
-              </option>
-              <option value="20">
-                20
-              </option>
-              <option value="30">
-                30
-              </option>
-            </select>
-          </label>
+          <div id="numberOfQuestionsDiv">
+            <label>
+              Number of questions:
+              <select onChange={(e) => handleNumberOfQuestionsChange(e)} value={settings.numberOfQuestions}>
+                <option value="10">
+                  10
+                </option>
+                <option value="20">
+                  20
+                </option>
+                <option value="30">
+                  30
+                </option>
+              </select>
+            </label>
+          </div>
 
-          <label>
-            Category:
-            <select onChange={(e) => handleCategoryChange(e)} value={settings.category}>
-              <option value="11">
-                Entertainment: Film
-              </option>
-              <option value="21">
-                Sports
-              </option>
-              <option value="27">
-                Animals
-              </option>
-            </select>
-          </label>
+          <div id="categoryDiv">
+            <label>
+              Category:
+              <select onChange={(e) => handleCategoryChange(e)} value={settings.category}>
+                <option value="11">
+                  Entertainment: Film
+                </option>
+                <option value="21">
+                  Sports
+                </option>
+                <option value="27">
+                  Animals
+                </option>
+              </select>
+            </label>
+          </div>
 
-          <label>
-            Difficulty:
-            <select onChange={(e) => handleDifficultyChange(e)} value={settings.difficulty}>
-              <option value="easy">
-                easy
-              </option>
-              <option value="medium">
-                medium
-              </option>
-              <option value="hard">
-                hard
-              </option>
-            </select>
-          </label>
+          <div id="difficultyDiv">
+            <label>
+              Difficulty:
+              <select onChange={(e) => handleDifficultyChange(e)} value={settings.difficulty}>
+                <option value="easy">
+                  easy
+                </option>
+                <option value="medium">
+                  medium
+                </option>
+                <option value="hard">
+                  hard
+                </option>
+              </select>
+            </label>
+          </div>
 
-          <label>
-            Type:
-            <select onChange={(e) => handleTypeChange(e)} value={settings.type}>
-              <option value="multiple">
-                Multiple Choice
-              </option>
-              <option value="boolean">
-                True / False
-              </option>
-            </select>
-          </label>
-          <button type="submit">Submit</button>
+          <div id="typeDiv">
+            <label>
+              Type:
+              <select onChange={(e) => handleTypeChange(e)} value={settings.type}>
+                <option value="multiple">
+                  Multiple Choice
+                </option>
+                <option value="boolean">
+                  True / False
+                </option>
+              </select>
+            </label>
+          </div>
+          <button type="submit">START</button>
         </form>
       </div>
     )
-
   }
 
   const Quiz = () => {
@@ -125,7 +152,10 @@ function App() {
     if (questions) {
       return (
         <div id="quiz">
-          {/* {questions.map(q => q)} */}
+          {questions.map(q => <div style={{ display: questions.findIndex(x => x.question === q.question) === questionCount ? "grid" : "none" }} className="question-card" key={q.correct_answer}>
+            <div className="question">{q.question}</div>
+            {q.incorrect_answers.concat(q.correct_answer).map(el => <div value={el} onClick={e => handleAnswerClick(e)} key={el} className="answerAlternative">{el}</div>)}
+          </div>)}
         </div>
       )
     } else {
@@ -136,7 +166,7 @@ function App() {
   const Result = () => {
     return (
       <div id="result">
-
+        {`Your score is ${numberOfCorrectAnswers} out of ${questions.length}`}
       </div>
     )
   }
@@ -145,7 +175,7 @@ function App() {
     // back to start-page
     return (
       <div id="header">
-        <button onClick={() => setView("start")}>HOME</button>
+        <button id="settingsButton" onClick={() => setView("start")}>SETTINGS</button>
       </div>
     )
   }
